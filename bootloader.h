@@ -1,7 +1,6 @@
 #ifndef _BOOTLOADER_H
 #define _BOOTLOAER_H
-#include "RWMEAReg.h"
-#include "V9811.h"
+#include "inc\V9811.h"
 #include <INTRINS.h>
 /*波特率寄存器的值*/
 #define D_baud115200REG 0xF9
@@ -31,14 +30,23 @@
 #define D_TRUE			1
 #define D_ABSOLUTE  	1
 #define D_RELATIVE		0
+
 #define RI_             0x01
 #define TI_             0x02
+
 #define D_DISINT()      (EA = 0)
 #define D_CLRWDT()      do {wdt0=0xA5;wdt1=0x5A; wdt0=0xA5;wdt1=0x5A;} while(0)
+
 #define D_RISET()       (SCON5 & RI_)
-#define D_RICLR()       do {SCON5 &= (~RI_); ExInt3IFG &= (~BIT3);}while(0)
+#define D_RICLR()       do {SCON5 &= (~RI_); ExInt3IE &= (~BIT3);}while(0)
+
+#define D_TISET()       (SCON5 & TI_) 
+#define D_TICLR()       do {SCON5 &= (~TI_);ExInt3IE &= (~BIT2);} while(0)
+
 #define D_TFSET()       (TCON & BIT5)
 #define D_TFCLR()       (TCON &= (~BIT5))
+
+#define D_SBUFF         (SBUF5)
 
 // echo代码
 #define D_STOP         	0x00    // 结束升级
@@ -53,6 +61,7 @@
 #define D_REPEATFRAM    0x06    // 重复请求上一帧数据
 #define D_REPEATSECTOR  0x07    // 重复请求上一扇区数据
 #define D_BTL           0x08    // bootloader标志
+#define D_EXIT          0x09    // 退出bootloader
 
 #define D_NOP()         _nop_()
 
@@ -82,6 +91,8 @@
 #define D_SECTORDONE	0x01
 #define D_ALLDATEDONE	0x02
 #define D_STOPUPDATE	0x03
+#define D_STARTUPDATE   0x04
+#define D_EXITBTL       0x05
 // note* bootloader位于flash中的最后10k_(10或20页)(0xD800-0xFFFF),其中0xFE00页用于保存用户程序的入口地址
 #if (D_MCU == D_V98XX)
     #define D_SECTORSUM		0x6c						// 128-20页
